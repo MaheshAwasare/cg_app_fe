@@ -1,0 +1,10 @@
+@tailwind base;
+
+@layer base {
+  html, body {
+    @apply bg-primary-600 min-h-screen;
+  }
+}
+
+@tailwind components;
+@tailwind utilities;
