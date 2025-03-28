@@ -156,7 +156,7 @@ export const fetchFromHuggingFace = async (
         temperature: 0.7,
         top_p: 0.95,
       },
-      apiToken: "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", // Make sure this is set in your environment
+      apiToken: "Test", // Make sure this is set in your environment
     });
 
     return response.generated_text;
