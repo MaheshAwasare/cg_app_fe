@@ -1,6 +1,10 @@
 import { ConceptSection } from '../types';
 
-export function parseConceptContent(content: string): ConceptSection[] {
+export function parseConceptContent(content: string | undefined): ConceptSection[] {
+  if (!content) {
+    return [];
+  }
+
   const sections: ConceptSection[] = [];
   
   // Regular expressions to match different header styles
@@ -9,7 +13,7 @@ export function parseConceptContent(content: string): ConceptSection[] {
     /(?:##|#)\s*([🌅🔑🌈🌍💡🧱🏗️🧩🔍🚀❓💭🌟📝🧠🔬📚💡🚨✏️]\s*.*?)(?:\s*\((\d+)-(\d+)\s*seconds\))?\s*\n([\s\S]*?)(?=(?:##|#|$))/g,
     
     // Standard format with time ranges
-    /(?:##|\*\*)\s*(.*?)(?:\s*\((\d+)-(\d+)\s*seconds\))?\s*(?:\*\*)?\n([\s\S]*?)(?=(?:##|\*\*|$))/g,
+    /(?:##|#)\s*(.*?)(?:\s*\((\d+)-(\d+)\s*seconds\))?\s*\n([\s\S]*?)(?=(?:##|#|$))/g,
     
     // Headers with just emojis (no time ranges)
     /(?:##|#)\s*([📝🧠🔍📚💡🚨✏️🔬📊]?\s*.*?)\n([\s\S]*?)(?=(?:##|#|$))/g
@@ -19,8 +23,9 @@ export function parseConceptContent(content: string): ConceptSection[] {
   for (const pattern of headerPatterns) {
     let match;
     let foundSections = false;
+    const contentCopy = content.toString(); // Ensure we have a string
     
-    while ((match = pattern.exec(content)) !== null) {
+    while ((match = pattern.exec(contentCopy)) !== null) {
       foundSections = true;
       const title = match[1].trim();
       let startTime = parseInt(match[2], 10);
@@ -59,28 +64,27 @@ export function parseConceptContent(content: string): ConceptSection[] {
       const lowerTitle = cleanTitle.toLowerCase();
       
       // Enhanced icon mapping
-      if (title.includes('📝') || lowerTitle.includes('understanding')) icon = 'FileText';
+      if (title.includes('📝') || lowerTitle.includes('understanding') || lowerTitle.includes('what it is')) icon = 'FileText';
       else if (title.includes('🧠') || lowerTitle.includes('structure')) icon = 'Brain';
       else if (title.includes('🔍') || lowerTitle.includes('analysis')) icon = 'Search';
       else if (title.includes('📚') || lowerTitle.includes('evidence')) icon = 'BookOpen';
-      else if (title.includes('💡') || lowerTitle.includes('conclusion')) icon = 'Lightbulb';
-      else if (title.includes('🚨') || lowerTitle.includes('pitfall')) icon = 'AlertTriangle';
-      else if (title.includes('✏️') || lowerTitle.includes('checklist')) icon = 'CheckSquare';
+      else if (title.includes('💡') || lowerTitle.includes('conclusion') || lowerTitle.includes('analogy')) icon = 'Lightbulb';
+      else if (title.includes('🚨') || lowerTitle.includes('pitfall') || lowerTitle.includes('misconception')) icon = 'AlertTriangle';
+      else if (title.includes('✏️') || lowerTitle.includes('checklist') || lowerTitle.includes('takeaway')) icon = 'CheckSquare';
       else if (title.includes('🔬') || lowerTitle.includes('specific')) icon = 'Microscope';
       else if (title.includes('📊') || lowerTitle.includes('time')) icon = 'Clock';
       else if (title.includes('🌅') || lowerTitle.includes('spark')) icon = 'Sunrise';
       else if (title.includes('🔑') || lowerTitle.includes('discovery')) icon = 'Key';
       else if (title.includes('🌈') || lowerTitle.includes('transformation')) icon = 'Rainbow';
-      else if (title.includes('🌍') || lowerTitle.includes('parallel')) icon = 'Globe';
-      else if (title.includes('🧱') || lowerTitle.includes('foundation')) icon = 'Box';
+      else if (title.includes('🌍') || lowerTitle.includes('parallel') || lowerTitle.includes('application')) icon = 'Globe';
+      else if (title.includes('🧱') || lowerTitle.includes('foundation') || lowerTitle.includes('principles')) icon = 'Box';
       else if (title.includes('🏗️') || lowerTitle.includes('layer')) icon = 'Layers';
       else if (title.includes('🧩') || lowerTitle.includes('connecting')) icon = 'PuzzlePiece';
       else if (title.includes('❓') || lowerTitle.includes('question')) icon = 'HelpCircle';
       else if (title.includes('💭') || lowerTitle.includes('insight')) icon = 'MessageCircle';
       else if (title.includes('🌟') || lowerTitle.includes('benefit')) icon = 'Star';
       else if (title.includes('🚀') || lowerTitle.includes('step')) icon = 'Rocket';
-      else if (title.includes('🔄') || lowerTitle.includes('related')) icon = 'RefreshCw';
-      // Default icon if no match
+      else if (title.includes('🔄') || lowerTitle.includes('related') || lowerTitle.includes('deeper') || lowerTitle.includes('learn more')) icon = 'RefreshCw';
       else icon = 'Circle';
       
       sections.push({
@@ -94,63 +98,59 @@ export function parseConceptContent(content: string): ConceptSection[] {
     if (foundSections) break; // Stop if we found sections with this pattern
   }
   
-  // If no sections were found with any pattern, create a default structure
+  // If no sections were found with any pattern, try direct markdown header parsing
   if (sections.length === 0) {
-    const defaultTimeRanges: [number, number][] = [
-      [0, 30],     // First section
-      [30, 60],    // Second section
-      [60, 90],    // Third section
-      [90, 110],   // Fourth section
-      [110, 120],  // Fifth section
-    ];
-    
-    // Split content by markdown headers
-    const parts = content.split(/(?=(?:##|#|\*\*))/);
+    const parts = content.split(/(?=##?\s+[^#\n]+)/);
     
     parts.forEach((part, index) => {
       if (!part.trim()) return;
       
-      // Extract title and content
-      const titleMatch = part.match(/(?:##|#|\*\*)\s*(.*?)(?:\*\*|\n)/);
-      const title = titleMatch ? titleMatch[1].trim() : `Section ${index + 1}`;
+      // Extract title and time range
+      const titleMatch = part.match(/##?\s+([^\n]+?)(?:\s*\((\d+)-(\d+)\s*seconds\))?\s*\n/);
+      if (!titleMatch) return;
       
-      // Clean up content
-      const content = part
-        .replace(/(?:##|#|\*\*)\s*(.*?)(?:\*\*|\n)/, '')
-        .trim()
-        .replace(/^\*+|\*+$/g, '')
+      const title = titleMatch[1].trim();
+      let startTime = parseInt(titleMatch[2], 10);
+      let endTime = parseInt(titleMatch[3], 10);
+      
+      // Get content after the header
+      let sectionContent = part
+        .replace(/##?\s+[^\n]+\n/, '') // Remove header
         .trim();
       
-      if (content) {
-        // Assign time range
-        const timeRange = index < defaultTimeRanges.length 
-          ? defaultTimeRanges[index] 
-          : [defaultTimeRanges[defaultTimeRanges.length - 1][1], defaultTimeRanges[defaultTimeRanges.length - 1][1] + 10];
+      // If no time range found in header, assign based on position
+      if (isNaN(startTime) || isNaN(endTime)) {
+        const timeRanges = [
+          [0, 10],     // What It Is
+          [10, 30],    // Everyday Analogy
+          [30, 60],    // Core Principles
+          [60, 90],    // Real-World Application
+          [90, 110],   // Common Misconception
+          [110, 120],  // Quick Takeaway
+          [120, 130]   // Want to go deeper
+        ];
         
-        // Determine icon based on content
-        let icon = '';
-        const lowerContent = content.toLowerCase();
-        
-        if (lowerContent.includes('understanding')) icon = 'FileText';
-        else if (lowerContent.includes('structure')) icon = 'Brain';
-        else if (lowerContent.includes('analysis')) icon = 'Search';
-        else if (lowerContent.includes('evidence')) icon = 'BookOpen';
-        else if (lowerContent.includes('conclusion')) icon = 'Lightbulb';
-        else if (lowerContent.includes('pitfall')) icon = 'AlertTriangle';
-        else if (lowerContent.includes('checklist')) icon = 'CheckSquare';
-        else if (lowerContent.includes('specific')) icon = 'Microscope';
-        else if (lowerContent.includes('time')) icon = 'Clock';
-        else if (index === 0) icon = 'FileText';
-        else if (index === sections.length - 1) icon = 'CheckSquare';
-        else icon = 'Circle';
-        
-        sections.push({
-          title,
-          content,
-          timeRange,
-          icon
-        });
+        [startTime, endTime] = timeRanges[Math.min(index, timeRanges.length - 1)];
       }
+      
+      // Determine icon based on content
+      let icon = 'Circle'; // Default icon
+      const lowerTitle = title.toLowerCase();
+      
+      if (lowerTitle.includes('what it is')) icon = 'FileText';
+      else if (lowerTitle.includes('analogy')) icon = 'Lightbulb';
+      else if (lowerTitle.includes('principles')) icon = 'Layers';
+      else if (lowerTitle.includes('application')) icon = 'Rocket';
+      else if (lowerTitle.includes('misconception')) icon = 'AlertTriangle';
+      else if (lowerTitle.includes('takeaway')) icon = 'CheckSquare';
+      else if (lowerTitle.includes('deeper') || lowerTitle.includes('learn more')) icon = 'BookOpen';
+      
+      sections.push({
+        title,
+        content: sectionContent,
+        timeRange: [startTime, endTime],
+        icon
+      });
     });
   }
   
@@ -158,38 +158,38 @@ export function parseConceptContent(content: string): ConceptSection[] {
 }
 
 export function extractRelatedConcepts(content: string): string[] {
+  if (!content) {
+    return [];
+  }
+
   // Look for sections that might contain related concepts
   const sections = [
     'Related Concepts',
-    'Related Academic Concepts',
-    'Adjacent Building Blocks',
-    'Related Questions',
-    'Want to go deeper?',
+    'Want to go deeper',
     'Further Study',
-    'Further Exploration',
     'To Learn More',
-    'Where to Learn More',
-    'Recommended Reading',
+    'Learn More',
+    'Related Topics',
     'See Also'
   ];
   
-  // Create a pattern that matches any of these sections
+  // Create a pattern that matches any of these sections and their content
   const sectionPattern = new RegExp(
-    `(?:${sections.join('|')})([\\s\\S]*?)(?=##|#|\\*\\*|$)`,
+    `(?:${sections.join('|')}).*?\\n([\\s\\S]*?)(?=##|#|$)`,
     'i'
   );
   
   const match = content.match(sectionPattern);
   
   if (match) {
-    // Extract bullet points, numbered items, or bold text items
+    // Extract bullet points or numbered items
     const items = match[1].match(/(?:[-*\d.]\s+|\*\*)(.*?)(?:\*\*|\n|$)/g);
     
     if (items) {
       return items
         .map(item => 
           item
-            .replace(/[-*\d.]\s+|\*\*/g, '')
+            .replace(/^[-*\d.]\s+|\*\*/g, '')
             .replace(/\[|\]/g, '')
             .trim()
         )
@@ -198,9 +198,14 @@ export function extractRelatedConcepts(content: string): string[] {
     }
   }
   
-  // Fallback: extract any capitalized phrases that might be concepts
-  const conceptMatches = content.match(/\b[A-Z][a-zA-Z\s]{2,}\b/g);
-  return conceptMatches 
-    ? [...new Set(conceptMatches)].slice(0, 3) 
-    : [];
+  // Fallback: look for numbered or bulleted lists anywhere in the content
+  const listItems = content.match(/(?:^|\n)[-*\d.]\s+([^\n]+)/g);
+  if (listItems) {
+    return listItems
+      .map(item => item.replace(/^[-*\d.]\s+/, '').trim())
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+  
+  return [];
 }

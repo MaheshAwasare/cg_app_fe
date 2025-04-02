@@ -36,17 +36,18 @@ const ConceptViewer: React.FC = () => {
     if (isLoading) {
       const intervalId = setInterval(() => {
         setLoadingMessageIndex((prevIndex) => (prevIndex + 1) % loadingMessages.length);
-      }, 2000); // Change message every 2 seconds
-
+      }, 2000);
       return () => clearInterval(intervalId);
     }
   }, [isLoading]);
   
   useEffect(() => {
-    if (currentConcept) {
+    if (currentConcept?.content) {
       const parsedSections = parseConceptContent(currentConcept.content);
+      console.log('Parsed sections:', parsedSections); // Debug log
       setSections(parsedSections);
-      setRelatedConcepts(extractRelatedConcepts(currentConcept.content));
+      const extractedConcepts = extractRelatedConcepts(currentConcept.content);
+      setRelatedConcepts(extractedConcepts);
       setCurrentTime(0);
       setIsPlaying(true);
       setShowExplanationStyles(false);
@@ -55,13 +56,11 @@ const ConceptViewer: React.FC = () => {
   
   useEffect(() => {
     let timer: number;
-    
     if (isPlaying && currentTime < totalTime) {
       timer = window.setInterval(() => {
         setCurrentTime(prev => Math.min(prev + 1, totalTime));
       }, 1000);
     }
-    
     return () => {
       if (timer) clearInterval(timer);
     };
@@ -128,20 +127,11 @@ const ConceptViewer: React.FC = () => {
     );
   }
   
-  if (!currentConcept) {
+  if (!currentConcept || !currentConcept.content) {
     return null;
   }
   
   const currentSectionIndex = getCurrentSectionIndex();
-  
-  const explanationStyles = [
-    { id: 'default', name: 'Standard', description: 'Clear definition with examples and principles' },
-    { id: 'problemSolutionBenefit', name: 'Problem-Solution', description: 'Presents the concept as a solution to a problem' },
-    { id: 'storytelling', name: 'Storytelling', isPremium: true, description: 'Explains through a narrative journey' },
-    { id: 'buildingBlocks', name: 'Building Blocks', description: 'Breaks down into fundamental components' },
-    { id: 'questionAnswer', name: 'Q&A Format', description: 'Presents as answers to common questions' },
-    { id: 'examAnswerResponse', name: 'Exam Format', isPremium: true, description: 'Structured like an academic response' }
-  ];
   
   return (
     <div className="w-full max-w-3xl mx-auto mt-8 px-4">
@@ -158,8 +148,29 @@ const ConceptViewer: React.FC = () => {
         {currentConcept.query}
       </h2>
       
- 
-      <div className="space-y-2">
+     {/** <ProgressBar currentTime={currentTime} totalTime={totalTime} />
+      
+      <div className="flex justify-center mb-6 space-x-4">
+        <button 
+          onClick={togglePlayPause}
+          className="p-2 rounded-full bg-primary-500 text-white hover:bg-primary-600 dark:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
+        >
+          {isPlaying ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          )}
+        </button>
+        
+        <button 
+          onClick={resetTimer}
+          className="p-2 rounded-full bg-primary-400 text-white hover:bg-primary-500 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        </button>
+      </div>
+       */}
+      <div className="space-y-4">
         {sections.map((section, index) => (
           <ConceptSection 
             key={index}
@@ -189,7 +200,14 @@ const ConceptViewer: React.FC = () => {
             Choose Another Explanation Style
           </h3>
           <div className="grid gap-3">
-            {explanationStyles.map((style) => {
+            {[
+              { id: 'default', name: 'Standard', description: 'Clear definition with examples and principles' },
+              { id: 'problemSolutionBenefit', name: 'Problem-Solution', description: 'Presents the concept as a solution to a problem' },
+              { id: 'storytelling', name: 'Storytelling', isPremium: true, description: 'Explains through a narrative journey' },
+              { id: 'buildingBlocks', name: 'Building Blocks', description: 'Breaks down into fundamental components' },
+              { id: 'questionAnswer', name: 'Q&A Format', description: 'Presents as answers to common questions' },
+              { id: 'examAnswerResponse', name: 'Exam Format', isPremium: true, description: 'Structured like an academic response' }
+            ].map((style) => {
               const isCurrentStyle = promptTemplate === style.id;
               const isPremium = style.isPremium;
               const isAvailable = !isPremium || (user?.subscription?.tier === 'premium');

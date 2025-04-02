@@ -1,4 +1,4 @@
-export const PREMIUM_TEMPLATES = ['storytelling', 'academicEssayResponse'] as const;
+export const PREMIUM_TEMPLATES = ['one', 'two'] as const;
 
 export const PRICING_PLANS = {
   month: {
