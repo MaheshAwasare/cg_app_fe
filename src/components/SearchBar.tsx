@@ -1,22 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import useStore from '../store';
 
 const SearchBar: React.FC = () => {
   const [query, setQuery] = useState('');
-  const { searchConcept, isLoading, currentConcept, promptTemplate, difficulty } = useStore();
+  const { searchConcept, isLoading } = useStore();
   
-  // Effect to re-search when template or difficulty changes
-  useEffect(() => {
-    if (currentConcept) {
-      searchConcept(currentConcept.query);
-    }
-  }, [promptTemplate, difficulty]);
-  
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      searchConcept(query.trim());
+      await searchConcept(query.trim());
     }
   };
   

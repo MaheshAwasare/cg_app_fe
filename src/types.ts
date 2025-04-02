@@ -25,6 +25,7 @@ export interface User {
   email: string;
   mobile: string;
   avatar?: string | null;
+  plan: string;  // Added plan property
   subscription?: {
     tier: SubscriptionTier;
     period: SubscriptionPeriod;

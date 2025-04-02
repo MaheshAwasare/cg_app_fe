@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, User, Lock, LogIn, AlertCircle, Mail, Phone, UserPlus, ArrowLeft } from 'lucide-react';
 import useStore from '../store';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -23,6 +24,16 @@ const LoginPage: React.FC = () => {
   const [regIsLoading, setRegIsLoading] = useState(false);
   
   const { login, register, darkMode, toggleDarkMode } = useStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Check if we should show registration form based on URL parameter
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('register') === 'true') {
+      setIsRegistering(true);
+    }
+  }, [location]);
   
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +48,9 @@ const LoginPage: React.FC = () => {
     
     try {
       const success = await login(identifier, pin);
-      if (!success) {
+      if (success) {
+        navigate('/dashboard');
+      } else {
         setLoginError('Invalid username/email or PIN');
       }
     } catch (error) {
@@ -87,7 +100,6 @@ const LoginPage: React.FC = () => {
     setRegIsLoading(true);
     
     try {
-      console.log("Before submit", regUsername,email,mobile, regPin, confirmPin, fullName)
       const success = await register(regUsername, email, mobile, regPin, confirmPin, fullName);
       if (success) {
         // Reset form and show success message
@@ -118,17 +130,25 @@ const LoginPage: React.FC = () => {
   const switchToRegister = () => {
     setLoginError('');
     setIsRegistering(true);
+    // Update URL without reloading the page
+    navigate('/login?register=true', { replace: true });
   };
   
   const switchToLogin = () => {
     setRegError('');
     setIsRegistering(false);
+    // Update URL without reloading the page
+    navigate('/login', { replace: true });
+  };
+
+  const handleBackToHome = () => {
+    navigate('/');
   };
   
   return (
     <div className="min-h-screen flex flex-col bg-primary-600 dark:bg-primary-800 text-white transition-colors">
       <header className="w-full py-4 px-6 flex justify-between items-center border-b border-primary-500 dark:border-primary-700">
-        <div className="flex items-center">
+        <div className="flex items-center cursor-pointer" onClick={handleBackToHome}>
           <BookOpen className="text-white mr-2" size={28} />
           <h1 className="text-xl font-bold text-white">ConceptGood</h1>
         </div>

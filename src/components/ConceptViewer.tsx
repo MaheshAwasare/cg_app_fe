@@ -7,6 +7,7 @@ import ActionButtons from './ActionButtons';
 import useStore from '../store';
 import { AlertCircle, HelpCircle } from 'lucide-react';
 import { PromptTemplate } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 const ConceptViewer: React.FC = () => {
   const { currentConcept, isLoading, error, aiProvider, promptTemplate, searchConcept, setPromptTemplate, isPremiumTemplate, user } = useStore();
@@ -15,7 +16,31 @@ const ConceptViewer: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [showExplanationStyles, setShowExplanationStyles] = useState(false);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const navigate = useNavigate();
   const totalTime = 120; // 2 minutes in seconds
+  
+  const loadingMessages = [
+    "Consulting the knowledge base...",
+    "Crafting the perfect explanation...",
+    "Distilling complex ideas...",
+    "Making it crystal clear...",
+    "Adding real-world examples...",
+    "Simplifying the concept...",
+    "Preparing your 2-minute lesson...",
+    "Making learning fun and easy...",
+    "Almost ready to enlighten you..."
+  ];
+
+  useEffect(() => {
+    if (isLoading) {
+      const intervalId = setInterval(() => {
+        setLoadingMessageIndex((prevIndex) => (prevIndex + 1) % loadingMessages.length);
+      }, 2000); // Change message every 2 seconds
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isLoading]);
   
   useEffect(() => {
     if (currentConcept) {
@@ -63,7 +88,6 @@ const ConceptViewer: React.FC = () => {
   };
 
   const handleExplanationStyleChange = async (template: PromptTemplate) => {
-    console.log("Calling backend")
     if (isPremiumTemplate(template) && (!user?.subscription || user.subscription.tier !== 'premium')) {
       navigate('/pricing');
       return;
@@ -78,9 +102,12 @@ const ConceptViewer: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <div className="w-12 h-12 border-4 border-primary-400 border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-white">
-          Generating explanation using {getProviderName(aiProvider)}...
+        <div className="w-12 h-12 border-4 border-primary-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-lg text-white mb-2">
+          {loadingMessages[loadingMessageIndex]}
+        </p>
+        <p className="text-sm text-primary-300">
+          Using {getProviderName(aiProvider)} to generate your explanation
         </p>
       </div>
     );
@@ -131,28 +158,7 @@ const ConceptViewer: React.FC = () => {
         {currentConcept.query}
       </h2>
       
-      <ProgressBar currentTime={currentTime} totalTime={totalTime} />
-      
-      <div className="flex justify-center mb-6 space-x-4">
-        <button 
-          onClick={togglePlayPause}
-          className="p-2 rounded-full bg-primary-500 text-white hover:bg-primary-600 dark:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
-        >
-          {isPlaying ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          )}
-        </button>
-        
-        <button 
-          onClick={resetTimer}
-          className="p-2 rounded-full bg-primary-400 text-white hover:bg-primary-500 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        </button>
-      </div>
-      
+ 
       <div className="space-y-2">
         {sections.map((section, index) => (
           <ConceptSection 
@@ -226,14 +232,13 @@ const ConceptViewer: React.FC = () => {
         </div>
       )}
       
-      {/*{relatedConcepts.length > 0 && (
+      {relatedConcepts.length > 0 && (
         <RelatedConcepts concepts={relatedConcepts} />
-      )}*/}
+      )}
     </div>
   );
 };
 
-// Helper function to get a friendly name for the provider
 function getProviderName(provider: string): string {
   switch (provider) {
     case 'local-ollama':
@@ -249,7 +254,6 @@ function getProviderName(provider: string): string {
   }
 }
 
-// Helper function to get a friendly name for the template
 function getTemplateName(template: string): string {
   switch (template) {
     case 'default':

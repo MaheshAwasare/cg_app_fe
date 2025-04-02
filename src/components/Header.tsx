@@ -46,7 +46,11 @@ const Header: React.FC = () => {
     navigate('/');
     clearCurrentConcept();
   };
- 
+
+  // Check if user has a free plan
+  const isFreePlan = user?.plan === 'FREE';
+  console.log("USER ", user);
+  console.log("IS FREE PLAN ", isFreePlan)
   return (
     <header className="w-full py-4 px-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
       <div
@@ -54,19 +58,15 @@ const Header: React.FC = () => {
         onClick={handleHomeClick}
       >
         <img
-          src="cg_logo_2.jpeg"
+          src="/cg_logo_2.jpeg"
           alt="ConceptGood Logo"
-          className="h-8 mr-2"
+          className="h-12 w-auto mr-3"
         />
-        <h1 className="text-xl font-bold text-primary-600 dark:text-white">ConceptGood</h1>
-       
+        <h1 className="text-2xl font-bold text-primary-600 dark:text-white">ConceptGood</h1>
       </div>
      
-     
       <div className="flex items-center space-x-4">
-       
-         {/* Home Menu Button */}
-         <button
+        <button
           onClick={handleHomeClick}
           className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-primary-600 dark:text-white flex items-center"
           aria-label="Home"
@@ -76,7 +76,6 @@ const Header: React.FC = () => {
           <span className="text-sm font-medium">Home</span>
         </button>
 
-        {/* Contact Us Button */}
         <div ref={contactInfoRef} className="relative">
           <button
             onClick={() => {
@@ -109,14 +108,13 @@ const Header: React.FC = () => {
                     +91 1234567899
                   </a>
                 </div>
-               
-               
               </div>
             </div>
           )}
         </div>
 
-        {(!user?.subscription || user.subscription.tier === 'free') && (
+        {/* Only show upgrade button if user has a free plan */}
+        {isFreePlan && (
           <button
             onClick={handleUpgradeClick}
             className="flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white rounded-lg hover:from-yellow-500 hover:to-yellow-700 transition-all shadow-sm"
