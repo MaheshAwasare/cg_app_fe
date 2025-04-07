@@ -139,7 +139,7 @@ const Header: React.FC = () => {
           </div>
         </div>
        
-        <div ref={templatesRef}>
+       {/**  <div ref={templatesRef}>
           <button
             onClick={() => {
               setShowTemplates(!showTemplates);
@@ -159,7 +159,7 @@ const Header: React.FC = () => {
             </div>
           )}
         </div>
-       
+      
         <div ref={settingsRef}>
           <button
             onClick={() => {
@@ -180,6 +180,7 @@ const Header: React.FC = () => {
             </div>
           )}
         </div>
+         */}
        
         <button
           onClick={toggleDarkMode}

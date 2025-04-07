@@ -56,9 +56,7 @@ const ConceptSection: React.FC<ConceptSectionProps> = ({
         </div>
         <h3 className="text-lg font-medium flex-1 text-primary-800 dark:text-white">
           {section.title}
-          <span className="text-sm font-normal text-primary-500 dark:text-primary-300 ml-2">
-            ({section.timeRange[0]}-{section.timeRange[1]}s)
-          </span>
+         
         </h3>
         {section.content.length > 150 && (
           <button 

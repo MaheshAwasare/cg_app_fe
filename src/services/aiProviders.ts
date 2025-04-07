@@ -24,30 +24,30 @@ comparison to everyday objects or experiences.
   
   // Default template with proper markdown formatting
   return `
-You are ConceptGood, an expert at explaining complex concepts simply. Your goal is to help someone understand ${query} in exactly 2 minutes through a carefully structured explanation.
+You are ConceptGood, an expert at explaining complex concepts simply. Your goal is to help someone understand ${query}  through a carefully structured explanation.
 
 Use this exact format for your response, including the markdown headers and time ranges:
 
-## What It Is (0-10 seconds)
+## What It Is
 [One clear sentence definition with absolutely no jargon, followed by a suggestion for a simple visual]
 
-## The Everyday Analogy (10-30 seconds)
+## The Everyday Analogy 
 [Create a relatable analogy comparing the concept to a common experience everyone has had]
 
-## Core Principles (30-60 seconds)
+## Core Principles
 [First key principle with a simple everyday comparison]
 
 [Second key principle with a simple everyday comparison]
 
 [Third key principle with a simple everyday comparison]
 
-## Real-World Application (60-90 seconds)
+## Real-World Application 
 [One concrete example of how this concept is already being used in the world in a way that affects people's lives]
 
-## Common Misconception Cleared (90-110 seconds)
+## Common Misconception Cleared 
 [Address the most widespread misunderstanding about this concept]
 
-## Quick Practical Takeaway (110-120 seconds)
+## Quick Practical Takeaway 
 [How understanding this concept might benefit the person in their lifetime]
 
 ## Want to go deeper?
@@ -58,11 +58,12 @@ Format your response exactly as shown above, keeping the markdown headers (##) a
 };
 
 // Function to call the backend API
-const callBackendAPI = async (prompt: string, query:string) => {
+const callBackendAPI = async (prompt: string, query:string,template:string) => {
   try {
     const response = await axios.post('http://localhost:5000/api/ai/aiResponseGoogle', {
       prompt,
-      query
+      query,
+      template
     });
     return response.data.response;
   } catch (error) {
@@ -74,25 +75,25 @@ const callBackendAPI = async (prompt: string, query:string) => {
 // Local Ollama API
 export const fetchFromOllama = async (query: string, complexityAdjustment: string, template: PromptTemplate) => {
   const prompt = getBasePrompt(query, complexityAdjustment, template);
-  return callBackendAPI(prompt,query);
+  return callBackendAPI(prompt,query,template);
 };
 
 // Google Gemini API
 export const fetchFromGoogle = async (query: string, complexityAdjustment: string, template: PromptTemplate) => {
   const prompt = getBasePrompt(query, complexityAdjustment, template);
-  return callBackendAPI(prompt,query);
+  return callBackendAPI(prompt,query,template);
 };
 
 // OpenAI API
 export const fetchFromOpenAI = async (query: string, complexityAdjustment: string, template: PromptTemplate) => {
   const prompt = getBasePrompt(query, complexityAdjustment, template);
-  return callBackendAPI(prompt,query);
+  return callBackendAPI(prompt,query,template);
 };
 
 // Anthropic Claude API
 export const fetchFromClaude = async (query: string, complexityAdjustment: string, template: PromptTemplate) => {
   const prompt = getBasePrompt(query, complexityAdjustment, template);
-  return callBackendAPI(prompt,query);
+  return callBackendAPI(prompt,query,template);
 };
 
 // Function to get the appropriate API based on the provider

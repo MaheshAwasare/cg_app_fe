@@ -2,28 +2,28 @@ export const promptTemplates: { [key: string]: string } = {
   "problemSolutionBenefit": `
 # Understanding [Concept/Topic]: Problem, Solution, and Benefit
 
-## 🚧 The Problem (0-30 seconds)
+## 🚧 The Problem
 Have you ever felt **overwhelmed** by [concept/topic]? It's like trying to navigate a maze in the dark, where you know there's a way out, but you can't see the path.
 
-## 💡 The Solution (30-60 seconds)
+## 💡 The Solution 
 That's where [concept/topic] comes in. It's like turning on a *flashlight in that maze*. It provides a clear framework or tool to:
 - Break down complex challenges
 - Offer structured approach
 - Simplify intricate processes
 
-## 🌟 The Benefit (60-90 seconds)
+## 🌟 The Benefit 
 Using [concept/topic] allows you to:
 1. **Transform confusion into clarity**
 2. *Gain actionable insights*
 3. Reduce stress and uncertainty
 
-## 🔍 A Quick Example (90-110 seconds)
+## 🔍 A Quick Example
 *Imagine*: [simple, relatable example]. Before, this would have been confusing, but with [concept/topic], you can see how:
 - Problems become manageable
 - Solutions become clear
 - Progress becomes achievable
 
-## 🚀 Your Actionable Step (110-120 seconds)
+## 🚀 Your Actionable Step
 To start using [concept/topic], try:
 - **Step 1**: [simple, practical first step]
 - **Step 2**: Reflect on your progress
@@ -43,28 +43,28 @@ Understanding [concept/topic] becomes even more powerful when you explore these 
   "storytelling": `
 # [Concept/Topic]: A Journey of Discovery
 
-## 🌅 The Spark (0-30 seconds)
+## 🌅 The Spark
 *Once upon a time*, there was [character/situation] facing a challenge: [describe the challenge]. They were searching for a way to [desired outcome].
 
-## 🔑 The Discovery (30-60 seconds)
+## 🔑 The Discovery
 **Suddenly**, they discovered [concept/topic]. It was like:
 - A hidden key
 - An unexpected solution
 - A transformative insight
 
-## 🌈 The Transformation (60-90 seconds)
+## 🌈 The Transformation
 Using [concept/topic], the protagonist:
 1. Overcame initial obstacles
 2. Gained profound understanding
 3. Achieved remarkable results
 
-## 🌍 A Modern Parallel (90-110 seconds)
+## 🌍 A Modern Parallel
 *This isn't just a story.* Today, we see [concept/topic] in action when:
 - [Relatable modern example]
 - [Another contemporary illustration]
 - [Third real-world application]
 
-## 💡 Your Takeaway (110-120 seconds)
+## 💡 Your Takeaway
 **Remember**: [concept/topic] is about:
 - Finding hidden paths
 - Transforming challenges
@@ -84,31 +84,31 @@ As our protagonist discovered [concept/topic], they also encountered these relat
   "buildingBlocks": `
 # [Concept/Topic]: Understanding the Fundamental Components
 
-## 🧱 The Foundation (0-30 seconds)
+## 🧱 The Foundation
 **Every complex idea is built from simpler parts.** Let's explore [concept/topic]:
 - First fundamental element
 - Core building block
 - Essential starting point
 
-## 🏗️ The Second Layer (30-60 seconds)
+## 🏗️ The Second Layer
 Now we add the *second fundamental element*:
 1. How it connects to the first layer
 2. Building complexity step by step
 3. Creating a robust structure
 
-## 🧩 The Connecting Element (60-90 seconds)
+## 🧩 The Connecting Element
 **The glue that holds everything together** is [third fundamental element]:
 - Demonstrates interconnectedness
 - Reveals hidden relationships
 - Provides systemic understanding
 
-## 🔍 Putting It Together (90-110 seconds)
+## 🔍 Putting It Together
 *When we combine these elements*, [concept/topic] emerges:
 - Integrated view
 - Holistic understanding
 - Comprehensive perspective
 
-## 🚀 Your First Step (110-120 seconds)
+## 🚀 Your First Step
 To master [concept/topic], focus on:
 - **Understanding the first element**
 - *Exploring connections*
@@ -128,28 +128,28 @@ To master [concept/topic], focus on:
   "questionAnswer": `
 # [Concept/Topic]: Answering Your Burning Questions
 
-## ❓ The Big Question (0-30 seconds)
+## ❓ The Big Question
 **Have you ever wondered** about [core question]? This isn't just a passing thought, but a fundamental inquiry that [concept/topic] addresses.
 
-## 💡 The Simple Answer (30-60 seconds)
+## 💡 The Simple Answer
 In essence, [concept/topic] means:
 - *Clear definition*
 - Concise explanation
 - Core understanding
 
-## 🌟 Why Does It Matter? (60-90 seconds)
+## 🌟 Why Does It Matter?
 **The significance lies in**:
 1. Solving real-world problems
 2. Providing new perspectives
 3. Enabling better decision-making
 
-## 🔍 A Real-World Example (90-110 seconds)
+## 🔍 A Real-World Example
 *Let's bring this to life*:
 - [Practical example]
 - [How it works in context]
 - [Tangible impact]
 
-## 💭 Your Key Insight (110-120 seconds)
+## 💭 Your Key Insight
 **Remember**: [concept/topic] is about:
 - Understanding
 - Applying

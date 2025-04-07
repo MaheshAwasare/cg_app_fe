@@ -5,7 +5,7 @@ import ConceptSection from './ConceptSection';
 import RelatedConcepts from './RelatedConcepts';
 import ActionButtons from './ActionButtons';
 import useStore from '../store';
-import { AlertCircle, HelpCircle } from 'lucide-react';
+import { AlertCircle, ArrowUp } from 'lucide-react';
 import { PromptTemplate } from '../types';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,6 @@ const ConceptViewer: React.FC = () => {
   const [relatedConcepts, setRelatedConcepts] = useState<string[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [showExplanationStyles, setShowExplanationStyles] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const navigate = useNavigate();
   const totalTime = 120; // 2 minutes in seconds
@@ -50,7 +49,6 @@ const ConceptViewer: React.FC = () => {
       setRelatedConcepts(extractedConcepts);
       setCurrentTime(0);
       setIsPlaying(true);
-      setShowExplanationStyles(false);
     }
   }, [currentConcept]);
   
@@ -95,6 +93,14 @@ const ConceptViewer: React.FC = () => {
     setPromptTemplate(template);
     if (currentConcept) {
       await searchConcept(currentConcept.query);
+    }
+  };
+
+  const scrollToExplanationStyles = () => {
+    // Scroll to the search bar section which contains the explanation styles
+    const searchBarSection = document.querySelector('.search-bar-section');
+    if (searchBarSection) {
+      searchBarSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
   
@@ -147,8 +153,8 @@ const ConceptViewer: React.FC = () => {
       <h2 className="text-2xl font-bold mb-6 text-center text-white">
         {currentConcept.query}
       </h2>
-      
-     {/** <ProgressBar currentTime={currentTime} totalTime={totalTime} />
+      {/**  
+      <ProgressBar currentTime={currentTime} totalTime={totalTime} />
       
       <div className="flex justify-center mb-6 space-x-4">
         <button 
@@ -169,7 +175,7 @@ const ConceptViewer: React.FC = () => {
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         </button>
       </div>
-       */}
+      */}
       <div className="space-y-4">
         {sections.map((section, index) => (
           <ConceptSection 
@@ -184,71 +190,15 @@ const ConceptViewer: React.FC = () => {
       
       <ActionButtons />
       
-      <div className="mt-8 mb-6 text-center">
+      <div className="mt-8 mb-6">
         <button
-          onClick={() => setShowExplanationStyles(!showExplanationStyles)}
-          className="inline-flex items-center text-white hover:text-primary-200 transition-colors"
+          onClick={scrollToExplanationStyles}
+          className="mx-auto flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors shadow-md hover:shadow-lg"
         >
-          <HelpCircle size={20} className="mr-2" />
-          Want to try a different explanation style?
+          <ArrowUp size={18} />
+          <span>Try a different explanation style</span>
         </button>
       </div>
-      
-      {showExplanationStyles && (
-        <div className="bg-white dark:bg-primary-900 rounded-lg p-6 mb-8 shadow-lg">
-          <h3 className="text-lg font-medium mb-4 text-primary-800 dark:text-white">
-            Choose Another Explanation Style
-          </h3>
-          <div className="grid gap-3">
-            {[
-              { id: 'default', name: 'Standard', description: 'Clear definition with examples and principles' },
-              { id: 'problemSolutionBenefit', name: 'Problem-Solution', description: 'Presents the concept as a solution to a problem' },
-              { id: 'storytelling', name: 'Storytelling', isPremium: true, description: 'Explains through a narrative journey' },
-              { id: 'buildingBlocks', name: 'Building Blocks', description: 'Breaks down into fundamental components' },
-              { id: 'questionAnswer', name: 'Q&A Format', description: 'Presents as answers to common questions' },
-              { id: 'examAnswerResponse', name: 'Exam Format', isPremium: true, description: 'Structured like an academic response' }
-            ].map((style) => {
-              const isCurrentStyle = promptTemplate === style.id;
-              const isPremium = style.isPremium;
-              const isAvailable = !isPremium || (user?.subscription?.tier === 'premium');
-              
-              return (
-                <button
-                  key={style.id}
-                  onClick={() => handleExplanationStyleChange(style.id as PromptTemplate)}
-                  className={`p-3 text-left rounded-lg border transition ${
-                    isCurrentStyle 
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-800/50' 
-                      : 'border-gray-200 hover:border-primary-300 dark:border-gray-700'
-                  } ${!isAvailable ? 'opacity-60' : ''}`}
-                  disabled={!isAvailable}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-medium text-primary-800 dark:text-white">
-                        {style.name}
-                      </span>
-                      {isPremium && (
-                        <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded">
-                          Premium
-                        </span>
-                      )}
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                        {style.description}
-                      </p>
-                    </div>
-                    {isCurrentStyle && (
-                      <span className="text-primary-600 dark:text-primary-400">
-                        Current
-                      </span>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
       
       {relatedConcepts.length > 0 && (
         <RelatedConcepts concepts={relatedConcepts} />
