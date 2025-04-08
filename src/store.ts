@@ -61,12 +61,20 @@ const useStore = create<AppState>((set, get) => ({
     try {
       console.log("Login Starts for ", username, password)
       const response = await loginUser(username, password);
-      if (response.success) {
-        set({ user: response.user, isAuthenticated: true, error: null });
+      if (response.success && response.data) {
+        set({ 
+          user: response.data, 
+          isAuthenticated: true, 
+          error: null 
+        });
 
         localStorage.setItem(
           'conceptgood_auth',
-          JSON.stringify({ isAuthenticated: true, user: response.user })
+          JSON.stringify({ 
+            isAuthenticated: true, 
+            user: response.data,
+            token: response.token 
+          })
         );
 
         return true;
@@ -81,10 +89,10 @@ const useStore = create<AppState>((set, get) => ({
     }
   },
 
-  register: async (username: string, email: string, mobile: string, password: string,cpassword: string,fullName:string) => {
+  register: async (username: string, email: string, mobile: string, password: string, cpassword: string, fullName: string) => {
     try {
-      console.log("Registration Starts for ", username,email,mobile,password,cpassword,fullName)
-      const response = await registerUser(username, email, mobile, password,fullName);
+      console.log("Registration Starts for ", username, email, mobile, password, cpassword, fullName)
+      const response = await registerUser(username, email, mobile, password, fullName);
       if (response.success) {
         console.log("Registration Successful for  ", username)
         return true;
@@ -102,6 +110,7 @@ const useStore = create<AppState>((set, get) => ({
   logout: () => {
     set({ isAuthenticated: false, user: null, currentConcept: null, concepts: [] });
     localStorage.removeItem('conceptgood_auth');
+    localStorage.removeItem('auth_token');
   },
 
   searchConcept: async (query: string) => {
@@ -168,7 +177,7 @@ const initAuth = () => {
   const savedAuth = localStorage.getItem('conceptgood_auth');
   if (savedAuth) {
     try {
-      const { isAuthenticated, user } = JSON.parse(savedAuth);
+      const { isAuthenticated, user, token } = JSON.parse(savedAuth);
       if (isAuthenticated && user) {
         useStore.setState({ isAuthenticated, user });
         useStore.getState().checkUserStatus(user.username);
@@ -176,6 +185,7 @@ const initAuth = () => {
     } catch (e) {
       console.error('Error parsing saved auth:', e);
       localStorage.removeItem('conceptgood_auth');
+      localStorage.removeItem('auth_token');
     }
   }
 };

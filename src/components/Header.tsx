@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Moon, Sun, Settings, LogOut, User as UserIcon, Layout, Crown, Home, Phone } from 'lucide-react';
+import { Moon, Sun, Settings, LogOut, User as UserIcon, Layout, Crown, Home, Phone, BarChart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store';
 import AIProviderSelector from './AIProviderSelector';
@@ -47,10 +47,13 @@ const Header: React.FC = () => {
     clearCurrentConcept();
   };
 
+  const handleDashboardClick = () => {
+    navigate('/user-dashboard');
+  };
+
   // Check if user has a free plan
   const isFreePlan = user?.plan === 'FREE';
-  console.log("USER ", user);
-  console.log("IS FREE PLAN ", isFreePlan)
+  
   return (
     <header className="w-full py-4 px-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
       <div
@@ -74,6 +77,16 @@ const Header: React.FC = () => {
         >
           <Home size={20} className="mr-1" />
           <span className="text-sm font-medium">Home</span>
+        </button>
+
+        <button
+          onClick={handleDashboardClick}
+          className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-primary-600 dark:text-white flex items-center"
+          aria-label="Dashboard"
+          title="Dashboard"
+        >
+          <BarChart size={20} className="mr-1" />
+          <span className="text-sm font-medium">Dashboard</span>
         </button>
 
         <div ref={contactInfoRef} className="relative">
@@ -138,49 +151,6 @@ const Header: React.FC = () => {
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </div>
         </div>
-       
-       {/**  <div ref={templatesRef}>
-          <button
-            onClick={() => {
-              setShowTemplates(!showTemplates);
-              setShowSettings(false);
-              setShowContactInfo(false);
-            }}
-            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-primary-600 dark:text-white"
-            aria-label="Template Settings"
-            title="Select Explanation Style"
-          >
-            <Layout size={20} />
-          </button>
-         
-          {showTemplates && (
-            <div className="absolute top-16 right-6 z-10 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <PromptTemplateSelector onClose={() => setShowTemplates(false)} />
-            </div>
-          )}
-        </div>
-      
-        <div ref={settingsRef}>
-          <button
-            onClick={() => {
-              setShowSettings(!showSettings);
-              setShowTemplates(false);
-              setShowContactInfo(false);
-            }}
-            className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-primary-600 dark:text-white"
-            aria-label="AI Provider Settings"
-            title="Select AI Provider"
-          >
-            <Settings size={20} />
-          </button>
-         
-          {showSettings && (
-            <div className="absolute top-16 right-6 z-10 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <AIProviderSelector onClose={() => setShowSettings(false)} />
-            </div>
-          )}
-        </div>
-         */}
        
         <button
           onClick={toggleDarkMode}

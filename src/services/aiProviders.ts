@@ -1,6 +1,37 @@
 import { AIProvider, PromptTemplate } from '../types';
 import { promptTemplates } from '../utils/promptTemplates';
 import axios from 'axios';
+import useStore from '../store';
+
+// Create axios instance with timeout
+const aiClient = axios.create({
+  timeout: 30000, // 30 seconds timeout
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Token interceptor
+aiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response interceptor to handle unauthorized responses
+aiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      // Clear auth state and redirect to login
+      useStore.getState().logout();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Base prompt template that will be used across all providers
 const getBasePrompt = (query: string, complexityAdjustment: string, template: PromptTemplate) => {
@@ -58,42 +89,50 @@ Format your response exactly as shown above, keeping the markdown headers (##) a
 };
 
 // Function to call the backend API
-const callBackendAPI = async (prompt: string, query:string,template:string) => {
+const callBackendAPI = async (prompt: string, query: string, template: string) => {
   try {
-    const response = await axios.post('http://localhost:5000/api/ai/aiResponseGoogle', {
+    // Get the current user from the store
+    const store = useStore.getState();
+    const username = store.user?.username || 'anonymous';
+
+    const response = await aiClient.post('http://localhost:5000/api/ai/aiResponseGoogle', {
       prompt,
       query,
-      template
+      template,
+      username
     });
     return response.data.response;
   } catch (error) {
+    if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
+      throw new Error('The request took too long to respond. Please try again.');
+    }
     console.error('Error calling backend API:', error);
-    throw new Error('Failed to generate explanation');
+    throw new Error('Failed to generate explanation. Please try again.');
   }
 };
 
 // Local Ollama API
 export const fetchFromOllama = async (query: string, complexityAdjustment: string, template: PromptTemplate) => {
   const prompt = getBasePrompt(query, complexityAdjustment, template);
-  return callBackendAPI(prompt,query,template);
+  return callBackendAPI(prompt, query, template);
 };
 
 // Google Gemini API
 export const fetchFromGoogle = async (query: string, complexityAdjustment: string, template: PromptTemplate) => {
   const prompt = getBasePrompt(query, complexityAdjustment, template);
-  return callBackendAPI(prompt,query,template);
+  return callBackendAPI(prompt, query, template);
 };
 
 // OpenAI API
 export const fetchFromOpenAI = async (query: string, complexityAdjustment: string, template: PromptTemplate) => {
   const prompt = getBasePrompt(query, complexityAdjustment, template);
-  return callBackendAPI(prompt,query,template);
+  return callBackendAPI(prompt, query, template);
 };
 
 // Anthropic Claude API
 export const fetchFromClaude = async (query: string, complexityAdjustment: string, template: PromptTemplate) => {
   const prompt = getBasePrompt(query, complexityAdjustment, template);
-  return callBackendAPI(prompt,query,template);
+  return callBackendAPI(prompt, query, template);
 };
 
 // Function to get the appropriate API based on the provider

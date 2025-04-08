@@ -23,7 +23,7 @@ const LoginPage: React.FC = () => {
   const [regError, setRegError] = useState('');
   const [regIsLoading, setRegIsLoading] = useState(false);
   
-  const { login, register, darkMode, toggleDarkMode } = useStore();
+  const { login, register, darkMode, toggleDarkMode, isAuthenticated } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -34,6 +34,18 @@ const LoginPage: React.FC = () => {
       setIsRegistering(true);
     }
   }, [location]);
+
+  useEffect(() => {
+    // If user is already authenticated, redirect to appropriate page
+    if (isAuthenticated) {
+      const state = location.state as { redirectTo?: string; initialQuery?: string } | null;
+      if (state?.redirectTo) {
+        navigate(state.redirectTo, { state: { initialQuery: state.initialQuery } });
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [isAuthenticated, navigate, location]);
   
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +61,12 @@ const LoginPage: React.FC = () => {
     try {
       const success = await login(identifier, pin);
       if (success) {
-        navigate('/dashboard');
+        const state = location.state as { redirectTo?: string; initialQuery?: string } | null;
+        if (state?.redirectTo) {
+          navigate(state.redirectTo, { state: { initialQuery: state.initialQuery } });
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         setLoginError('Invalid username/email or PIN');
       }

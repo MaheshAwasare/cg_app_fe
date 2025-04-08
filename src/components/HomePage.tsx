@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useStore from '../store';
 import { BookOpen, Search, Clock, Lightbulb, Brain, Target, BarChart, Layers, Compass, BookMarked, MessageSquare, HelpCircle, School, Moon, Sun, ArrowRight, Check, Mail, Phone } from 'lucide-react';
+import Header from './Header';
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { darkMode, toggleDarkMode, isLoading } = useStore();
+  const { darkMode, toggleDarkMode, isLoading, isAuthenticated, user } = useStore();
   
+  useEffect(() => {
+    // If user is authenticated, redirect to dashboard
+    if (isAuthenticated && user) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, user, navigate]);
+
   const handleLogin = () => {
     navigate('/login');
   };
@@ -16,11 +24,17 @@ const HomePage = () => {
   };
 
   const handleSearch = async (query: string) => {
-    useStore.setState({ isLoading: true });
-    console.log("After setting isLoading:", useStore.getState().isLoading);
-    
-    navigate('/dashboard', { state: { initialQuery: query } });
+    if (isAuthenticated) {
+      navigate('/dashboard', { state: { initialQuery: query } });
+    } else {
+      navigate('/login', { state: { redirectTo: '/dashboard', initialQuery: query } });
+    }
   };
+  
+  // If user is authenticated, don't render the homepage
+  if (isAuthenticated) {
+    return null;
+  }
   
   return (
     <div className="min-h-screen bg-primary-50 dark:bg-primary-900">

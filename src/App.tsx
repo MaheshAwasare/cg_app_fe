@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import SearchBar from './components/SearchBar';
 import ConceptViewer from './components/ConceptViewer';
@@ -10,17 +10,31 @@ import PricingPage from './components/PricingPage';
 import UpgradePage from './components/UpgradePage';
 import PaymentPage from './components/PaymentPage';
 import HomePage from './components/HomePage';
+import UserDashboard from './components/UserDashboard';
 import useStore from './store';
+
+// Protected Route component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, user } = useStore();
+  const location = useLocation();
+
+  if (!isAuthenticated || !user) {
+    // Redirect to login page with the return url
+    return <Navigate to="/login" state={{ redirectTo: location.pathname }} replace />;
+  }
+
+  return <>{children}</>;
+};
 
 // Dashboard component to handle the location state
 const Dashboard = () => {
   const location = useLocation();
-  const { searchConcept, currentConcept, isAuthenticated, isLoading } = useStore();
+  const { searchConcept, currentConcept, isAuthenticated, isLoading, user } = useStore();
   const initialQuery = location.state?.initialQuery;
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   const loadingMessages = [
-    "Establishing a connection to the knowledge base...",
+   "Establishing a connection to the knowledge base...",
     "Warming up the AI...",
     "Consulting the ancient algorithms...",
     "Decoding the secrets of the universe...",
@@ -74,21 +88,21 @@ const Dashboard = () => {
   ];
 
   useEffect(() => {
-    if (initialQuery) {
+    if (initialQuery && isAuthenticated) {
       searchConcept(initialQuery);
     }
-  }, [initialQuery]);
+  }, [initialQuery, isAuthenticated]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       setLoadingMessageIndex((prevIndex) => (prevIndex + 1) % loadingMessages.length);
-    }, 3000); // Change message every 3 seconds
+    }, 3000);
 
     return () => clearInterval(intervalId);
   }, []);
 
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return <Navigate to="/login" state={{ redirectTo: '/dashboard', initialQuery }} replace />;
   }
 
   return (
@@ -105,11 +119,9 @@ const Dashboard = () => {
             <ConceptHistory />
           </>
         ) : isLoading ? (
-          // Show loading state instead of EmptyState when loading
           <div className="flex flex-col justify-center items-center h-64">
             <div className="w-12 h-12 border-4 border-primary-400 border-t-transparent rounded-full animate-spin mb-4"></div>
             <p className="text-lg text-primary-200">{loadingMessages[loadingMessageIndex]}</p>
-            {/* You could also add a spinner or other loading indicator here */}
           </div>
         ) : (
           <EmptyState />
@@ -136,10 +148,39 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/user-dashboard" 
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/upgrade" element={<UpgradePage />} />
-          <Route path="/payment" element={<PaymentPage />} />
+          <Route 
+            path="/upgrade" 
+            element={
+              <ProtectedRoute>
+                <UpgradePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/payment" 
+            element={
+              <ProtectedRoute>
+                <PaymentPage />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </div>
     </Router>
