@@ -10,14 +10,15 @@ import { PromptTemplate } from '../types';
 import { useNavigate } from 'react-router-dom';
 
 const ConceptViewer: React.FC = () => {
+  
   const { currentConcept, isLoading, error, aiProvider, promptTemplate, searchConcept, setPromptTemplate, isPremiumTemplate, user } = useStore();
+  console.log("ConceptViewer received error:", error);
   const [sections, setSections] = useState<ReturnType<typeof parseConceptContent>>([]);
   const [relatedConcepts, setRelatedConcepts] = useState<string[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const navigate = useNavigate();
-  const totalTime = 120; // 2 minutes in seconds
   
   const loadingMessages = [
     "Consulting the knowledge base...",
@@ -43,7 +44,6 @@ const ConceptViewer: React.FC = () => {
   useEffect(() => {
     if (currentConcept?.content) {
       const parsedSections = parseConceptContent(currentConcept.content);
-      console.log('Parsed sections:', parsedSections); // Debug log
       setSections(parsedSections);
       const extractedConcepts = extractRelatedConcepts(currentConcept.content);
       setRelatedConcepts(extractedConcepts);
@@ -97,11 +97,18 @@ const ConceptViewer: React.FC = () => {
   };
 
   const scrollToExplanationStyles = () => {
-    // Scroll to the search bar section which contains the explanation styles
     const searchBarSection = document.querySelector('.search-bar-section');
     if (searchBarSection) {
       searchBarSection.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const getErrorMessage = (error: any) => {
+    console.log("getErrorMessage received:", error); 
+    if (typeof error === 'object' && error !== null) {
+      return error.error || 'An unexpected error occurred. Please try again.';
+    }
+    return error || 'An unexpected error occurred. Please try again.';
   };
   
   if (isLoading) {
@@ -119,16 +126,20 @@ const ConceptViewer: React.FC = () => {
   }
   
   if (error) {
+    console.log("ConceptViewer error state:", error);
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="w-12 h-12 flex items-center justify-center text-red-400 mb-4">
           <AlertCircle size={48} />
         </div>
         <h3 className="text-xl font-medium mb-2 text-white">Error</h3>
-        <p className="text-primary-200 mb-4">{error}</p>
-        <p className="text-sm text-primary-300">
-          Try selecting a different AI provider or check your connection.
-        </p>
+        <p className="text-primary-200 mb-4">{getErrorMessage(error)}</p>
+        <button 
+          onClick={() => currentConcept && searchConcept(currentConcept.query)}
+          className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -138,6 +149,7 @@ const ConceptViewer: React.FC = () => {
   }
   
   const currentSectionIndex = getCurrentSectionIndex();
+  const totalTime = 120; // 2 minutes in seconds
   
   return (
     <div className="w-full max-w-3xl mx-auto mt-8 px-4">
@@ -153,29 +165,7 @@ const ConceptViewer: React.FC = () => {
       <h2 className="text-2xl font-bold mb-6 text-center text-white">
         {currentConcept.query}
       </h2>
-      {/**  
-      <ProgressBar currentTime={currentTime} totalTime={totalTime} />
       
-      <div className="flex justify-center mb-6 space-x-4">
-        <button 
-          onClick={togglePlayPause}
-          className="p-2 rounded-full bg-primary-500 text-white hover:bg-primary-600 dark:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
-        >
-          {isPlaying ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          )}
-        </button>
-        
-        <button 
-          onClick={resetTimer}
-          className="p-2 rounded-full bg-primary-400 text-white hover:bg-primary-500 dark:bg-primary-600 dark:hover:bg-primary-500 transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-        </button>
-      </div>
-      */}
       <div className="space-y-4">
         {sections.map((section, index) => (
           <ConceptSection 

@@ -103,11 +103,17 @@ const callBackendAPI = async (prompt: string, query: string, template: string) =
     });
     return response.data.response;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
-      throw new Error('The request took too long to respond. Please try again.');
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('The request took too long to respond. Please try again.');
+      }
+      if (error.response?.status === 500) {
+        const errorMessage = error.response.data?.error || 'Internal Server Error';
+        throw new Error(errorMessage);
+      }
+      throw new Error(error.message || 'Failed to generate explanation. Please try again.');
     }
-    console.error('Error calling backend API:', error);
-    throw new Error('Failed to generate explanation. Please try again.');
+    throw new Error('An unexpected error occurred. Please try again.');
   }
 };
 

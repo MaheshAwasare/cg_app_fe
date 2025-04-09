@@ -34,7 +34,7 @@ const Dashboard = () => {
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   const loadingMessages = [
-   "Establishing a connection to the knowledge base...",
+    "Establishing a connection to the knowledge base...",
     "Warming up the AI...",
     "Consulting the ancient algorithms...",
     "Decoding the secrets of the universe...",

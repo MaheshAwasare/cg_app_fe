@@ -59,7 +59,6 @@ const useStore = create<AppState>((set, get) => ({
 
   login: async (username: string, password: string) => {
     try {
-      console.log("Login Starts for ", username, password)
       const response = await loginUser(username, password);
       if (response.success && response.data) {
         set({ 
@@ -91,10 +90,8 @@ const useStore = create<AppState>((set, get) => ({
 
   register: async (username: string, email: string, mobile: string, password: string, cpassword: string, fullName: string) => {
     try {
-      console.log("Registration Starts for ", username, email, mobile, password, cpassword, fullName)
       const response = await registerUser(username, email, mobile, password, fullName);
       if (response.success) {
-        console.log("Registration Successful for  ", username)
         return true;
       } else {
         set({ error: response.message || 'Registration failed' });
@@ -164,7 +161,15 @@ const useStore = create<AppState>((set, get) => ({
         isLoading: false,
       }));
     } catch (error) {
-      set({ error: error instanceof Error ? error.message : 'An unknown error occurred', isLoading: false });
+      let errorMessage = 'An unknown error occurred';
+      console.log("ERROR RECEIVED!")
+      console.log("Error object:", error);
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      set({ error: { error: errorMessage }, isLoading: false });
+      console.log("Store state after error update:", get()); 
+      console.log("ERROR SET!", error)
     }
   },
 

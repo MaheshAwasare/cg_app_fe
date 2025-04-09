@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Clock, Search, Zap, Calendar, ArrowUp, ArrowDown, AlertCircle, MessageCircle } from 'lucide-react';
+import { BarChart, Clock, Search, Calendar, ArrowUp, ArrowDown, AlertCircle, MessageCircle } from 'lucide-react';
 import useStore from '../store';
 import { formatDate } from '../utils/dateUtils';
 import Header from './Header';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ConceptPopup from './ConceptPopup';
 
 interface UserStats {
   total_messages: number;
-  total_accesses: number;
   last_message_date: string;
 }
 
@@ -16,25 +16,29 @@ interface UserMessage {
   concept_name: string;
   ai_answer: string;
   created_date: string;
-  accessed_times: number;
 }
 
-const API_BASE_URL = 'http://localhost:5000/api/ai';
+interface OpenConcept {
+  query: string;
+  content: string;
+}
+
+const API_BASE_URL = 'http://localhost:5000/api';
 
 const UserDashboard: React.FC = () => {
-  const { user, isAuthenticated, searchConcept } = useStore();
+  const { user, isAuthenticated } = useStore();
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'year'>('week');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [stats, setStats] = useState<UserStats | null>(null);
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [openConcepts, setOpenConcepts] = useState<OpenConcept[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Check authentication
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated || !user || !user.username) {
       navigate('/login', { state: { redirectTo: '/user-dashboard' } });
       return;
     }
@@ -50,11 +54,14 @@ const UserDashboard: React.FC = () => {
           'Authorization': `Bearer ${token}`
         };
 
-        // Fetch both stats and messages in parallel
         const [statsResponse, messagesResponse] = await Promise.all([
-          axios.get(`${API_BASE_URL}/user-stats/${user.username}`, { headers }),
-          axios.get(`${API_BASE_URL}/user-messages/${user.username}`, { headers })
+          axios.get(`${API_BASE_URL}/ai/user-stats/${user.username}`, { headers }),
+          axios.get(`${API_BASE_URL}/ai/user-messages/${user.username}`, { headers })
         ]);
+
+        if (!statsResponse.data || !messagesResponse.data) {
+          throw new Error('Invalid response data');
+        }
 
         setStats(statsResponse.data);
         setMessages(messagesResponse.data);
@@ -62,8 +69,10 @@ const UserDashboard: React.FC = () => {
       } catch (err) {
         console.error('Error fetching user data:', err);
         setError('Failed to load user data');
-        if (axios.isAxiosError(err) && err.response?.status === 401) {
-          navigate('/login', { state: { redirectTo: '/user-dashboard' } });
+        if (axios.isAxiosError(err)) {
+          if (err.response?.status === 401 || err.response?.status === 404) {
+            navigate('/login', { state: { redirectTo: '/user-dashboard' } });
+          }
         }
       } finally {
         setLoading(false);
@@ -73,7 +82,6 @@ const UserDashboard: React.FC = () => {
     fetchData();
   }, [user?.username, location.pathname, isAuthenticated, navigate]);
   
-  // Get filtered messages based on timeframe
   const getFilteredMessages = () => {
     const now = Date.now();
     const timeframes = {
@@ -87,7 +95,6 @@ const UserDashboard: React.FC = () => {
     );
   };
   
-  // Sort messages based on created_date
   const getSortedMessages = () => {
     const filtered = getFilteredMessages();
     return [...filtered].sort((a, b) => {
@@ -97,14 +104,22 @@ const UserDashboard: React.FC = () => {
     });
   };
 
-  const handleConceptClick = async (message: UserMessage) => {
-    await searchConcept(message.concept_name, message.ai_answer);
-    navigate('/dashboard');
+  const handleConceptClick = (message: UserMessage) => {
+    setOpenConcepts([...openConcepts, {
+      query: message.concept_name,
+      content: message.ai_answer
+    }]);
+  };
+  
+  const handleClosePopup = (index: number) => {
+    const newOpenConcepts = [...openConcepts];
+    newOpenConcepts.splice(index, 1);
+    setOpenConcepts(newOpenConcepts);
   };
   
   const sortedMessages = getSortedMessages();
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated || !user || !user.username) {
     return null;
   }
 
@@ -137,8 +152,7 @@ const UserDashboard: React.FC = () => {
           </div>
         )}
         
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white dark:bg-primary-900 rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <Search className="text-primary-600 dark:text-primary-400" size={24} />
@@ -151,7 +165,6 @@ const UserDashboard: React.FC = () => {
               Total Searches
             </p>
           </div>
-         
           
           <div className="bg-white dark:bg-primary-900 rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
@@ -167,7 +180,6 @@ const UserDashboard: React.FC = () => {
           </div>
         </div>
         
-        {/* History Section */}
         <div className="bg-white dark:bg-primary-900 rounded-xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-primary-800 dark:text-white">
@@ -175,7 +187,6 @@ const UserDashboard: React.FC = () => {
             </h2>
             
             <div className="flex items-center space-x-4">
-              {/* Timeframe Filter */}
               <div className="flex items-center bg-primary-100 dark:bg-primary-800 rounded-lg p-1">
                 {(['week', 'month', 'year'] as const).map((t) => (
                   <button
@@ -192,7 +203,6 @@ const UserDashboard: React.FC = () => {
                 ))}
               </div>
               
-              {/* Sort Order Toggle */}
               <button
                 onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
                 className="p-2 rounded-lg bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-white transition"
@@ -232,6 +242,15 @@ const UserDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {openConcepts.map((concept, index) => (
+        <ConceptPopup
+          key={index}
+          query={concept.query}
+          content={concept.content}
+          onClose={() => handleClosePopup(index)}
+        />
+      ))}
     </div>
   );
 };
