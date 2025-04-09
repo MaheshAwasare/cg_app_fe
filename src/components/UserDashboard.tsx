@@ -22,7 +22,7 @@ interface UserMessage {
 const API_BASE_URL = 'http://localhost:5000/api/ai';
 
 const UserDashboard: React.FC = () => {
-  const { user, isAuthenticated } = useStore();
+  const { user, isAuthenticated, searchConcept } = useStore();
   const [timeframe, setTimeframe] = useState<'week' | 'month' | 'year'>('week');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -96,6 +96,11 @@ const UserDashboard: React.FC = () => {
       return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
     });
   };
+
+  const handleConceptClick = async (message: UserMessage) => {
+    await searchConcept(message.concept_name, message.ai_answer);
+    navigate('/dashboard');
+  };
   
   const sortedMessages = getSortedMessages();
 
@@ -146,32 +151,7 @@ const UserDashboard: React.FC = () => {
               Total Searches
             </p>
           </div>
-          
-          <div className="bg-white dark:bg-primary-900 rounded-xl p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <Zap className="text-primary-600 dark:text-primary-400" size={24} />
-              <span className="text-xs text-primary-500 dark:text-primary-400">All Time</span>
-            </div>
-            <h3 className="text-3xl font-bold text-primary-800 dark:text-white mb-1">
-              {stats?.total_accesses || 0}
-            </h3>
-            <p className="text-sm text-primary-600 dark:text-primary-400">
-              Total Accesses
-            </p>
-          </div>
-          
-          <div className="bg-white dark:bg-primary-900 rounded-xl p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <BarChart className="text-primary-600 dark:text-primary-400" size={24} />
-              <span className="text-xs text-primary-500 dark:text-primary-400">Average</span>
-            </div>
-            <h3 className="text-3xl font-bold text-primary-800 dark:text-white mb-1">
-              {stats?.total_messages ? Math.round(stats.total_accesses / stats.total_messages) : 0}
-            </h3>
-            <p className="text-sm text-primary-600 dark:text-primary-400">
-              Average Accesses per Search
-            </p>
-          </div>
+         
           
           <div className="bg-white dark:bg-primary-900 rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-4">
@@ -226,6 +206,7 @@ const UserDashboard: React.FC = () => {
             {sortedMessages.map((message, index) => (
               <div
                 key={index}
+                onClick={() => handleConceptClick(message)}
                 className="flex items-center justify-between p-4 bg-primary-50 dark:bg-primary-800/50 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-800 transition cursor-pointer"
               >
                 <div className="flex-1">
@@ -237,12 +218,9 @@ const UserDashboard: React.FC = () => {
                       <Calendar size={14} className="mr-1" />
                       {formatDate(new Date(message.created_date).getTime())}
                     </span>
-                    <span className="flex items-center">
-                      <MessageCircle size={14} className="mr-1" />
-                      {message.accessed_times} views
-                    </span>
                   </div>
                 </div>
+                <MessageCircle size={20} className="text-primary-400" />
               </div>
             ))}
             

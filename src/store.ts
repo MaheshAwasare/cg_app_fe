@@ -113,7 +113,7 @@ const useStore = create<AppState>((set, get) => ({
     localStorage.removeItem('auth_token');
   },
 
-  searchConcept: async (query: string) => {
+  searchConcept: async (query: string, existingAnswer?: string) => {
     const cachedConcept = get().concepts.find(
       (c) => c.query.toLowerCase() === query.toLowerCase() &&
              c.template === get().promptTemplate &&
@@ -128,26 +128,34 @@ const useStore = create<AppState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const difficultyLevel = get().difficulty;
-      let complexityAdjustment = '';
+      let content: string;
+      
+      if (existingAnswer) {
+        // Use the existing answer if provided
+        content = existingAnswer;
+      } else {
+        // Otherwise, generate a new answer using AI
+        const difficultyLevel = get().difficulty;
+        let complexityAdjustment = '';
 
-      if (difficultyLevel === 'intermediate') {
-        complexityAdjustment = 'Use slightly more advanced terminology, but still explain any technical terms.';
-      } else if (difficultyLevel === 'advanced') {
-        complexityAdjustment = 'You can use more technical terminology and go deeper into the subject, but still maintain clarity.';
+        if (difficultyLevel === 'intermediate') {
+          complexityAdjustment = 'Use slightly more advanced terminology, but still explain any technical terms.';
+        } else if (difficultyLevel === 'advanced') {
+          complexityAdjustment = 'You can use more technical terminology and go deeper into the subject, but still maintain clarity.';
+        }
+
+        const provider = get().aiProvider;
+        const template = get().promptTemplate;
+        content = await getAIResponse(query, provider, complexityAdjustment, template);
       }
-
-      const provider = get().aiProvider;
-      const template = get().promptTemplate;
-      const content = await getAIResponse(query, provider, complexityAdjustment, template);
 
       const newConcept: Concept = {
         id: Date.now().toString(),
         query,
         content,
         timestamp: Date.now(),
-        template,
-        difficulty: difficultyLevel,
+        template: get().promptTemplate,
+        difficulty: get().difficulty,
       };
 
       set((state) => ({
