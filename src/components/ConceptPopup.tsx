@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { parseConceptContent, extractRelatedConcepts } from '../utils/parseContent';
+import { parseConceptContent } from '../utils/parseContent';
 import ConceptSection from './ConceptSection';
 
 interface ConceptPopupProps {
@@ -29,17 +29,23 @@ const ConceptPopup: React.FC<ConceptPopupProps> = ({ query, content, onClose }) 
         </div>
         
         <div className="p-6">
-          <div className="space-y-4">
-            {sections.map((section, index) => (
-              <ConceptSection 
-                key={index}
-                section={section}
-                isActive={false}
-                isCompleted={true}
-                onSectionClick={() => {}}
-              />
-            ))}
-          </div>
+          {content ? (
+            <div className="prose dark:prose-invert max-w-none">
+              {sections.map((section, index) => (
+                <ConceptSection 
+                  key={index}
+                  section={section}
+                  isActive={false}
+                  isCompleted={true}
+                  onSectionClick={() => {}}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-gray-600 dark:text-gray-400">
+              No content available
+            </div>
+          )}
         </div>
       </div>
     </div>

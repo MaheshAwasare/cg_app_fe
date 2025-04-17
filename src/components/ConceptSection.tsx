@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import * as Icons from 'lucide-react';
+import { Circle, ChevronUp, ChevronDown, FileText, Brain, Search, BookOpen, Lightbulb, AlertTriangle, CheckSquare, Microscope, Clock, Sunrise, Key, Globe, Box, Layers, HelpCircle, MessageCircle, Star, Rocket, RefreshCw } from 'lucide-react';
 import { ConceptSection as ConceptSectionType } from '../types';
 
 interface ConceptSectionProps {
@@ -18,14 +18,38 @@ const ConceptSection: React.FC<ConceptSectionProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   
-  // Dynamically get the icon component
-  const IconComponent = section.icon ? (Icons as any)[section.icon] : Icons.Circle;
+  // Map icon strings to actual components
+  const iconMap = {
+    FileText,
+    Brain,
+    Search,
+    BookOpen,
+    Lightbulb,
+    AlertTriangle,
+    CheckSquare,
+    Microscope,
+    Clock,
+    Sunrise,
+    Key,
+    Globe,
+    Box,
+    Layers,
+    HelpCircle,
+    MessageCircle,
+    Star,
+    Rocket,
+    RefreshCw,
+    Circle
+  };
+  
+  // Get the icon component
+  const IconComponent = section.icon ? iconMap[section.icon as keyof typeof iconMap] || Circle : Circle;
   
   // Get section-specific styling
   const getSectionStyles = () => {
     const baseStyles = {
       active: {
-      container: "bg-primary-50 dark:bg-primary-800/50",
+        container: "bg-primary-50 dark:bg-primary-800/50",
         iconBg: "bg-primary-100 text-primary-600 dark:bg-primary-700 dark:text-primary-300"
       },
       completed: {
@@ -33,7 +57,7 @@ const ConceptSection: React.FC<ConceptSectionProps> = ({
         iconBg: "bg-primary-100 text-primary-600 dark:bg-primary-700 dark:text-primary-300"
       },
       pending: {
-         container: "bg-primary-50 dark:bg-primary-800/50",
+        container: "bg-primary-50 dark:bg-primary-800/50",
         iconBg: "bg-primary-100 text-primary-600 dark:bg-primary-700 dark:text-primary-300"
       }
     };
@@ -56,7 +80,6 @@ const ConceptSection: React.FC<ConceptSectionProps> = ({
         </div>
         <h3 className="text-lg font-medium flex-1 text-primary-800 dark:text-white">
           {section.title}
-         
         </h3>
         {section.content.length > 150 && (
           <button 
@@ -66,7 +89,7 @@ const ConceptSection: React.FC<ConceptSectionProps> = ({
             }}
             className="text-primary-600 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200"
           >
-            {expanded ? <Icons.ChevronUp size={20} /> : <Icons.ChevronDown size={20} />}
+            {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
         )}
       </div>

@@ -59,11 +59,10 @@ export function parseConceptContent(content: string | undefined): ConceptSection
         [startTime, endTime] = timeRanges[Math.min(sectionIndex, timeRanges.length - 1)];
       }
       
-      // Assign icons based on section titles and content
-      let icon = '';
+      // Map section titles to icon names
+      let icon = 'Circle'; // Default icon
       const lowerTitle = cleanTitle.toLowerCase();
       
-      // Enhanced icon mapping
       if (title.includes('📝') || lowerTitle.includes('understanding') || lowerTitle.includes('what it is')) icon = 'FileText';
       else if (title.includes('🧠') || lowerTitle.includes('structure')) icon = 'Brain';
       else if (title.includes('🔍') || lowerTitle.includes('analysis')) icon = 'Search';
@@ -79,13 +78,11 @@ export function parseConceptContent(content: string | undefined): ConceptSection
       else if (title.includes('🌍') || lowerTitle.includes('parallel') || lowerTitle.includes('application')) icon = 'Globe';
       else if (title.includes('🧱') || lowerTitle.includes('foundation') || lowerTitle.includes('principles')) icon = 'Box';
       else if (title.includes('🏗️') || lowerTitle.includes('layer')) icon = 'Layers';
-      else if (title.includes('🧩') || lowerTitle.includes('connecting')) icon = 'PuzzlePiece';
       else if (title.includes('❓') || lowerTitle.includes('question')) icon = 'HelpCircle';
       else if (title.includes('💭') || lowerTitle.includes('insight')) icon = 'MessageCircle';
       else if (title.includes('🌟') || lowerTitle.includes('benefit')) icon = 'Star';
       else if (title.includes('🚀') || lowerTitle.includes('step')) icon = 'Rocket';
       else if (title.includes('🔄') || lowerTitle.includes('related') || lowerTitle.includes('deeper') || lowerTitle.includes('learn more')) icon = 'RefreshCw';
-      else icon = 'Circle';
       
       sections.push({
         title: cleanTitle,

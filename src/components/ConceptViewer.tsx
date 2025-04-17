@@ -52,7 +52,7 @@ const ConceptViewer: React.FC = () => {
     }
   }, [currentConcept]);
   
-  useEffect(() => {
+  /*useEffect(() => {
     let timer: number;
     if (isPlaying && currentTime < totalTime) {
       timer = window.setInterval(() => {
@@ -62,7 +62,7 @@ const ConceptViewer: React.FC = () => {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [isPlaying, currentTime]);
+  }, [isPlaying, currentTime]);*/
   
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
